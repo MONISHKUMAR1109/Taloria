@@ -123,6 +123,7 @@ function verificationFor(i) {
 }
 
 async function seed() {
+  await client.connect();
   if (await alreadySeeded() && !process.argv.includes('--force')) {
     console.log('Demo data already exists. Use `npm run db:seed -- --force` to reseed.');
     await client.end();
@@ -174,9 +175,9 @@ async function seed() {
     const { rows: p } = await q(
       `INSERT INTO organizer_profiles (user_id, organization_name, organization_type, country, city, is_seed)
        VALUES ($1, $2, $3, $4, $5, true) RETURNING id`,
-      [u.rows[0].id, orgName, orgType, COUNTRIES_CITIES[(idx * 3) % 12][0], COUNTRIES_CITIES[(idx * 3) % 12][1]],
+      [u[0].id, orgName, orgType, COUNTRIES_CITIES[(idx * 3) % 12][0], COUNTRIES_CITIES[(idx * 3) % 12][1]],
     );
-    organizerIds.push(p.rows[0].id);
+    organizerIds.push(p[0].id);
   }
 
   // --- Scouts ---------------------------------------------------------------
@@ -188,14 +189,14 @@ async function seed() {
       `INSERT INTO users (email, password_hash, role, email_verified_at, is_seed)
        VALUES ('scout${i + 1}@taloria.demo', $1, 'scout', now(), true) RETURNING id`, [passwordHash],
     );
-    scoutUserIds.push(u.rows[0].id);
+    scoutUserIds.push(u[0].id);
     const { rows: p } = await q(
       `INSERT INTO scout_profiles (user_id, first_name, last_name, organization, country, city, bio, years_scouting, is_seed)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true) RETURNING id`,
-      [u.rows[0].id, first, last, org, COUNTRIES_CITIES[i][0], COUNTRIES_CITIES[i][1],
+      [u[0].id, first, last, org, COUNTRIES_CITIES[i][0], COUNTRIES_CITIES[i][1],
         `Scout focused on ${org}.`, 4 + (i % 12)],
     );
-    scoutProfileIds.push(p.rows[0].id);
+    scoutProfileIds.push(p[0].id);
   }
 
   // --- Sponsors -------------------------------------------------------------
@@ -209,10 +210,10 @@ async function seed() {
     const { rows: p } = await q(
       `INSERT INTO sponsor_profiles (user_id, company_name, industry, website, country, bio, is_seed)
        VALUES ($1, $2, $3, $4, $5, $6, true) RETURNING id`,
-      [u.rows[0].id, company, industry, `https://example.${company.toLowerCase()}`, 'United Kingdom',
+      [u[0].id, company, industry, `https://example.${company.toLowerCase()}`, 'United Kingdom',
         `Sponsor within ${industry}.`],
     );
-    sponsorProfileIds.push(p.rows[0].id);
+    sponsorProfileIds.push(p[0].id);
   }
 
   // --- Athletes -------------------------------------------------------------
@@ -227,13 +228,13 @@ async function seed() {
       `INSERT INTO users (email, password_hash, role, email_verified_at, is_seed)
        VALUES ('athlete${i + 1}@taloria.demo', $1, 'athlete', now(), true) RETURNING id`, [passwordHash],
     );
-    athleteUserIds.push(u.rows[0].id);
+    athleteUserIds.push(u[0].id);
     const { rows: p } = await q(
       `INSERT INTO athlete_profiles (user_id, first_name, last_name, date_of_birth, country, city, bio, verification_status, is_seed)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true) RETURNING id`,
-      [u.rows[0].id, first, last, dob, country, city, `${first} ${last} — ${city}, ${country}. ${i % 2 ? 'Attacking playmaker.' : 'Reliable all-rounder.'}`, verification],
+      [u[0].id, first, last, dob, country, city, `${first} ${last} — ${city}, ${country}. ${i % 2 ? 'Attacking playmaker.' : 'Reliable all-rounder.'}`, verification],
     );
-    athleteProfileIds.push(p.rows[0].id);
+    athleteProfileIds.push(p[0].id);
   }
 
   // --- Athlete sports / stats / achievements --------------------------------
