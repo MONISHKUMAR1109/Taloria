@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import env from './config/env.js';
@@ -58,6 +59,19 @@ api.use('/public', publicRoutes);
 app.use('/api', api);
 
 app.get('/health', (_req, res) => res.json({ success: true, status: 'ok', uptime: process.uptime() }));
+
+// In production, serve the built frontend so a single service hosts the whole site.
+const frontendDist = path.resolve(__dirname, '../../frontend/dist');
+if (fs.existsSync(path.join(frontendDist, 'index.html'))) {
+  app.use(express.static(frontendDist, { maxAge: '1h' }));
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads') || req.path === '/health') {
+      return next();
+    }
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+}
 
 app.use(notFoundHandler);
 app.use(errorHandler);

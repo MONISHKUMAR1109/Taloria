@@ -7,13 +7,7 @@
     <meta name="theme-color" content="#e59b2b" />
     <meta name="description" content="TALORIA — Where Talent Finds Its Stage. The verified marketplace for athletes, scouts, organizers, and sponsors." />
     <title>TALORIA — Where Talent Finds Its Stage</title>
-    <script>
-      // Apply the saved theme before first paint to avoid a flash.
-      try {
-        var saved = localStorage.getItem('taloria-theme')
-        if (saved === 'dark') document.documentElement.dataset.theme = 'dark'
-      } catch (e) {}
-    </script>
+    <script src="/theme-init.js"></script>
   </head>
   <body>
     <div id="root"></div>

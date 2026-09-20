@@ -1,0 +1,22 @@
+# Render blueprint (https://render.com/docs/blueprint-spec)
+# NOTE: Replace the placeholder DATABASE_URL below with the real Neon
+# connection string in the Render dashboard right after the first deploy
+# (Service > Environment), then Render restarts the service automatically.
+services:
+  - type: web
+    name: taloria
+    runtime: node
+    repo: https://github.com/MONISHKUMAR1109/Taloria
+    branch: main
+    plan: free
+    env: node
+    buildCommand: npm install && npm --prefix backend install && npm --prefix frontend install && npm --prefix frontend run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        value: postgres://CHANGE_ME:CHANGE_ME@CHANGE_ME.neon.tech/taloria?sslmode=require
