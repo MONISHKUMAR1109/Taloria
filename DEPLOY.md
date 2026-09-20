@@ -30,7 +30,7 @@ npm run test:int   # integration suite against the live DB
 2. Pick the **Taloria** repo, branch `main`.
 3. Leave root directory as `/`.
 4. Set:
-   - **Build command**: `npm install && npm --prefix backend install && npm --prefix frontend install && npm --prefix frontend run build`
+   - **Build command**: `npm install && npm --prefix frontend install --include=dev && npm --prefix backend install && npm --prefix frontend run build`
    - **Start command**: `npm start`
 5. Add env vars:
    - `NODE_ENV=production`
