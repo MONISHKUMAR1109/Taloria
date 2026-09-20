@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: taloria-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: taloria
+      POSTGRES_PASSWORD: taloria
+      POSTGRES_DB: taloria
+    ports:
+      - "5432:5432"
+    volumes:
+      - taloria-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taloria -d taloria"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  taloria-pgdata:

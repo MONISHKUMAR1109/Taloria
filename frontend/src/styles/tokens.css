@@ -1,0 +1,108 @@
+/* ============================================================
+   TALORIA design tokens — "Where Talent Finds Its Stage."
+   §2–3 brand identity, expressed as CSS custom properties.
+   Swap brand values here; every component consumes them via var().
+   ============================================================ */
+
+:root {
+  /* Brand accents (spotlight gold & stage crimson) */
+  --brand-300: #ffd97a;
+  --brand-400: #f5b544;
+  --brand-500: #e59b2b;
+  --brand-600: #c97f16;
+
+  --accent-400: #ef5b6e;
+  --accent-500: #d93a52;
+  --accent-600: #b7243e;
+
+  /* Neutrals / surfaces */
+  --ink: #17141c;
+  --ink-2: #241f2d;
+  --surface-1: #ffffff;
+  --surface-2: #f6f4f9;
+  --surface-3: #ece8f1;
+  --border: #dcd6e4;
+  --muted: #6b6377;
+  --on-accent: #ffffff;
+
+  /* Semantic */
+  --success-bg: #e7f6ec;
+  --success-fg: #1f7a45;
+  --warning-bg: #fdf3dd;
+  --warning-fg: #8a5a00;
+  --danger-bg: #fde9ea;
+  --danger-fg: #b7243e;
+  --info-bg: #e8f1fb;
+  --info-fg: #1f5fa8;
+
+  /* Typography scale (fluid-ish steps) */
+  --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-display: 'Sora', 'Inter', var(--font-sans);
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+  --text-4xl: 3rem;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 2.75rem;
+  --space-8: 4rem;
+
+  /* Radii */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+  --radius-full: 999px;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px rgb(23 20 28 / 0.08);
+  --shadow-md: 0 4px 12px rgb(23 20 28 / 0.1);
+  --shadow-lg: 0 12px 32px rgb(23 20 28 / 0.16);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+
+  /* Layout */
+  --container: 72rem;
+  --nav-height: 4rem;
+
+  /* Code (formula, brand) */
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --ink: #f4f1f8;
+  --ink-2: #d7d1e0;
+  --surface-1: #1b1722;
+  --surface-2: #221d2b;
+  --surface-3: #2c2637;
+  --border: #38303f;
+  --muted: #a49baee0;
+  --on-accent: #1b1722;
+
+  --success-bg: #17311f;
+  --success-fg: #7ed39a;
+  --warning-bg: #362a10;
+  --warning-fg: #f0c15c;
+  --danger-bg: #3a1820;
+  --danger-fg: #f28a9a;
+  --info-bg: #17283b;
+  --info-fg: #8fb8ea;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 12px rgb(0 0 0 / 0.45);
+  --shadow-lg: 0 12px 32px rgb(0 0 0 / 0.55);
+
+  color-scheme: dark;
+}
