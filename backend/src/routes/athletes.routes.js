@@ -63,6 +63,7 @@ const PROFILE_SELECT = `
     ap.bio,
     ap.profile_picture_key,
     ap.verification_status,
+    ap.archived_at,
     ap.created_at,
     ap.updated_at,
     (SELECT count(*)::int FROM athlete_sports as2 WHERE as2.athlete_id = ap.id) AS sport_count,

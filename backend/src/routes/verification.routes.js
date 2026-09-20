@@ -34,8 +34,8 @@ router.post(
       'SELECT id, verification_status FROM athlete_profiles WHERE user_id = $1 AND archived_at IS NULL',
       [req.user.id],
     );
-    if (pr.rowCount === 0) throw forbidden('Athlete profile required.');
-    const profile = pr.rows[0];
+    if (pr.length === 0) throw forbidden('Athlete profile required.');
+    const profile = pr[0];
 
     if (profile.verification_status === 'verified') {
       throw new AppError(ERROR_CODES.VERIFICATION_ALREADY_PENDING, 'Your profile is already verified.', 409);

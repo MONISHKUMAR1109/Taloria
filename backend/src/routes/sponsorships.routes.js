@@ -39,8 +39,8 @@ router.post(
       'SELECT id FROM sponsor_profiles WHERE user_id = $1 AND archived_at IS NULL',
       [req.user.id],
     );
-    if (spn.rowCount === 0) throw forbidden('Sponsor profile required.');
-    const sponsorId = spn.rows[0].id;
+    if (spn.length === 0) throw forbidden('Sponsor profile required.');
+    const sponsorId = spn[0].id;
 
     const pkg = await pool.query(
       `SELECT sp.id, sp.tournament_id, sp.name, t.status AS tournament_status
@@ -158,12 +158,12 @@ router.get(
 
     if (req.user.role === 'sponsor') {
       const { rows: pr } = await pool.query('SELECT id FROM sponsor_profiles WHERE user_id = $1 AND archived_at IS NULL', [req.user.id]);
-      if (pr.rowCount === 0) throw forbidden('Sponsor profile required.');
-      add('sr.sponsor_id = ?::uuid', pr.rows[0].id);
+      if (pr.length === 0) throw forbidden('Sponsor profile required.');
+      add('sr.sponsor_id = ?::uuid', pr[0].id);
     } else if (req.user.role === 'organizer') {
       const { rows: or } = await pool.query('SELECT id FROM organizer_profiles WHERE user_id = $1 AND archived_at IS NULL', [req.user.id]);
-      if (or.rowCount === 0) throw forbidden('Organizer profile required.');
-      add('t.organizer_id = ?::uuid', or.rows[0].id);
+      if (or.length === 0) throw forbidden('Organizer profile required.');
+      add('t.organizer_id = ?::uuid', or[0].id);
     }
     if (q.status) add('sr.status = ?', q.status);
     if (q.tournament_id) add('sr.tournament_id = ?::uuid', q.tournament_id);
@@ -216,7 +216,7 @@ router.put(
 
     if (req.user.role === 'sponsor') {
       const { rows: pr } = await pool.query('SELECT id FROM sponsor_profiles WHERE user_id = $1 AND archived_at IS NULL', [req.user.id]);
-      if (pr.rowCount === 0 || pr.rows[0].id !== request.sponsor_id) {
+      if (pr.length === 0 || pr[0].id !== request.sponsor_id) {
         throw forbidden('Not your sponsorship request.');
       }
       // Sponsor cancels: translate 'rejected' intent to cancellation.
@@ -234,7 +234,7 @@ router.put(
     }
     if (!isAdmin) {
       const { rows: or } = await pool.query('SELECT id FROM organizer_profiles WHERE user_id = $1 AND archived_at IS NULL', [req.user.id]);
-      if (or.rowCount === 0 || or.rows[0].id !== request.organizer_id) {
+      if (or.length === 0 || or[0].id !== request.organizer_id) {
         throw forbidden('Only the tournament organizer can review this request.');
       }
     }

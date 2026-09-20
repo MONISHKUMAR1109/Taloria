@@ -50,13 +50,13 @@ router.get(
 
     if (req.user.role === 'athlete') {
       const { rows: pr } = await pool.query('SELECT id FROM athlete_profiles WHERE user_id = $1 AND archived_at IS NULL', [req.user.id]);
-      if (pr.rowCount === 0) throw forbidden('Athlete profile required.');
-      add('ta.athlete_id = ?::uuid', pr.rows[0].id);
+      if (pr.length === 0) throw forbidden('Athlete profile required.');
+      add('ta.athlete_id = ?::uuid', pr[0].id);
       if (q.status) add('ta.status = ?', q.status);
     } else if (req.user.role === 'organizer') {
       const { rows: or } = await pool.query('SELECT id FROM organizer_profiles WHERE user_id = $1 AND archived_at IS NULL', [req.user.id]);
-      if (or.rowCount === 0) throw forbidden('Organizer profile required.');
-      add('t.organizer_id = ?::uuid', or.rows[0].id);
+      if (or.length === 0) throw forbidden('Organizer profile required.');
+      add('t.organizer_id = ?::uuid', or[0].id);
       if (q.tournament_id) add('ta.tournament_id = ?::uuid', q.tournament_id);
       if (q.status) add('ta.status = ?', q.status);
     } else {

@@ -10,8 +10,8 @@ const rateLimitedBody = {
   },
 };
 
-function limitRequests(maxPerMinute) {
-  return rateLimit({
+function limitRequests(maxPerMinute, { skipWhenEnv = [] } = {}) {
+  const limiter = rateLimit({
     windowMs: 60 * 1000,
     limit: maxPerMinute,
     standardHeaders: 'draft-7',
@@ -20,12 +20,16 @@ function limitRequests(maxPerMinute) {
       res.status(429).json(rateLimitedBody);
     },
   });
+  return (req, res, next) => {
+    if (skipWhenEnv.includes(process.env.NODE_ENV)) return next();
+    return limiter(req, res, next);
+  };
 }
 
 /** Applied to auth endpoints (e.g. 10 req/min/IP on login). */
-export const authRateLimit = limitRequests(10);
+export const authRateLimit = limitRequests(10, { skipWhenEnv: ['test'] });
 
 /** Generic API-safe limit to prevent runaway clients. */
-export const apiRateLimit = limitRequests(120);
+export const apiRateLimit = limitRequests(120, { skipWhenEnv: ['test'] });
 
 export default authRateLimit;

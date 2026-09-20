@@ -350,10 +350,13 @@ router.post(
     try {
       await client.query('BEGIN');
       const { rows: takenRows } = await client.query(
-        `SELECT count(*)::int AS taken FROM tournament_participants WHERE tournament_id = $1`,
+        `SELECT
+           (SELECT count(*)::int FROM tournament_participants WHERE tournament_id = $1) AS participants,
+           (SELECT count(*)::int FROM tournament_applications
+             WHERE tournament_id = $1 AND status IN ('pending', 'waitlisted')) AS in_line`,
         [tournament.id],
       );
-      const full = takenRows[0].taken >= tournament.max_participants;
+      const full = takenRows[0].participants + takenRows[0].in_line >= tournament.max_participants;
       const status = full ? 'waitlisted' : 'pending';
 
       const { rows } = await client.query(

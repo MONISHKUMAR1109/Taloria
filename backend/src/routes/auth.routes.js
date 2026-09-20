@@ -19,7 +19,6 @@ import { ok, created } from '../utils/envelope.js';
 import {
   badRequest,
   unauthorized,
-  conflict,
   AppError,
   ERROR_CODES,
 } from '../utils/errors.js';
@@ -103,8 +102,8 @@ async function issueTokens(userId, client, res) {
   const accessToken = await signAccessToken(userId);
   const refreshToken = generateRefreshToken();
   await client.query(
-    `INSERT INTO refresh_tokens (user_id, token_hash, expires_at, is_seed)
-     VALUES ($1, $2, now() + ($3::int || ' days')::interval, false)`,
+    `INSERT INTO refresh_tokens (user_id, token_hash, expires_at)
+     VALUES ($1, $2, now() + ($3::int || ' days')::interval)`,
     [userId, hashRefreshToken(refreshToken), env.refreshTokenTtlDays],
   );
   setRefreshCookie(res, refreshToken);
@@ -129,7 +128,7 @@ router.post(
 
       const existing = await client.query('SELECT id FROM users WHERE email = $1', [email]);
       if (existing.rowCount > 0) {
-        throw conflict(ERROR_CODES.EMAIL_TAKEN, 'An account with this email already exists.');
+        throw new AppError(ERROR_CODES.EMAIL_TAKEN, 'An account with this email already exists.', 409);
       }
 
       const passwordHash = await hashPassword(password);

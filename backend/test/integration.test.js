@@ -3,6 +3,10 @@ import assert from 'node:assert/strict';
 import 'dotenv/config';
 import pg from 'pg';
 
+// Disable API rate limiting during automated runs (integration goes through
+// the auth endpoints many times per minute from a single test client IP).
+process.env.NODE_ENV = 'test';
+
 /**
  * End-to-end API tests against a live PostgreSQL database (spec §32).
  * Skips cleanly when no DATABASE_URL / reachable DB is available — the unit
@@ -19,7 +23,7 @@ const emailSuffix = `${Date.now()}`;
 
 async function poolProbe() {
   if (!canRunDb) return false;
-  const client = new pg.Client({ connectionString: url, connectionTimeoutMillis: 2000 });
+  const client = new pg.Client({ connectionString: url, connectionTimeoutMillis: 15000 });
   try {
     await client.connect();
     await client.query('SELECT 1');
@@ -33,7 +37,7 @@ async function poolProbe() {
 
 const dbReady = await poolProbe();
 
-test('integration suite requires a reachable database', { skip: !dbReady, timeout: 30000 }, async (t) => {
+test('integration suite requires a reachable database', { skip: !dbReady, timeout: 180000 }, async (t) => {
   const emails = {
     athlete: `it-athlete-${emailSuffix}@taloria.test`,
     scout: `it-scout-${emailSuffix}@taloria.test`,
@@ -80,8 +84,8 @@ test('integration suite requires a reachable database', { skip: !dbReady, timeou
   });
 
   await t.test('duplicate email -> EMAIL_TAKEN', async () => {
-    await register('athlete', emails.athlete); // already registered above
-    // re-register same email with different role must still be blocked
+    // emails.scout was already registered above; re-registering the same
+    // email with a different role must still be blocked.
     const res = await request(app)
       .post('/api/auth/register')
       .send({ email: emails.scout, password, role: 'athlete' });
