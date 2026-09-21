@@ -1,7 +1,6 @@
 import 'dotenv/config';
 import pg from 'pg';
 import bcrypt from 'bcryptjs';
-import { randomUUID } from 'node:crypto';
 
 /**
  * Seed script for local development (§29).
@@ -23,8 +22,6 @@ if (!url) {
 
 const client = new pg.Client({ connectionString: url });
 const DEMO_PASSWORD = 'Password123!';
-
-const uid = () => randomUUID();
 
 async function q(sql, params = []) {
   return client.query(sql, params);

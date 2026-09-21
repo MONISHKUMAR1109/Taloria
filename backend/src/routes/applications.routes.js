@@ -8,8 +8,6 @@ import { requireRole } from '../middleware/authorize.js';
 import { validateBody } from '../middleware/validate.js';
 import { ok } from '../utils/envelope.js';
 import { notFound, forbidden, AppError, ERROR_CODES } from '../utils/errors.js';
-import { audit } from '../utils/audit.js';
-import { notifyUser } from '../services/notifications.js';
 
 const router = Router();
 

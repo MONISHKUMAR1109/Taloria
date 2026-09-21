@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import pool from '../config/db.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { badRequest } from '../utils/errors.js';
 import { COMPLETENESS_SQL } from '../services/completeness.js';
 import { ok } from '../utils/envelope.js';
 

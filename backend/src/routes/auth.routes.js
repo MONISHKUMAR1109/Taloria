@@ -509,7 +509,11 @@ router.get(
   '/me',
   authenticate,
   asyncHandler(async (req, res) => {
-    res.json(ok({ user: userPayload(req.user) }));
+    const profileTable = profileTableByRole[req.user.role];
+    const { rows: profileRows } = profileTable
+      ? await pool.query(`SELECT id FROM ${profileTable} WHERE user_id = $1 AND archived_at IS NULL`, [req.user.id])
+      : { rows: [] };
+    res.json(ok({ user: userPayload(req.user), profileId: profileRows[0]?.id ?? null }));
   }),
 );
 

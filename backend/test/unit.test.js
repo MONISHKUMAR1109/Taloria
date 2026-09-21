@@ -5,7 +5,6 @@ import { hashPassword, verifyPassword } from '../src/utils/password.js';
 import { hashRefreshToken, generateRefreshToken, hashOpaqueToken } from '../src/utils/tokens.js';
 import { parsePagination } from '../src/utils/pagination.js';
 import { assertStatsMatchTemplate } from '../src/services/statistics.js';
-import { badRequest } from '../src/utils/errors.js';
 
 test('detectType identifies formats by magic bytes', () => {
   const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0, 0, 0]);

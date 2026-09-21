@@ -26,7 +26,7 @@ async function rawRequest<T>(path: string, options: RequestOptions = {}): Promis
   const { auth = true, retried: _retried, headers, ...init } = options
   const requestHeaders = new Headers(headers)
 
-  if (init.body && !requestHeaders.has('Content-Type')) {
+  if (init.body && !(init.body instanceof FormData) && !requestHeaders.has('Content-Type')) {
     requestHeaders.set('Content-Type', 'application/json')
   }
 

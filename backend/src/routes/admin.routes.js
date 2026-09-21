@@ -7,7 +7,7 @@ import { authenticate } from '../middleware/authenticate.js';
 import { requireRole } from '../middleware/authorize.js';
 import { validateBody } from '../middleware/validate.js';
 import { ok } from '../utils/envelope.js';
-import { notFound, badRequest, AppError, ERROR_CODES } from '../utils/errors.js';
+import { notFound, badRequest } from '../utils/errors.js';
 import { audit } from '../utils/audit.js';
 
 const router = Router();

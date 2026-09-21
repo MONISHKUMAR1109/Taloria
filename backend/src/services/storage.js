@@ -65,7 +65,7 @@ class LocalDriver {
     fs.mkdirSync(this.root, { recursive: true });
   }
 
-  async put(buffer, { contentType, kind, detectedType }) {
+  async put(buffer, { contentType: _contentType, kind, detectedType }) {
     const key = `${kind}/${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${detectedType}`;
     const absolute = path.join(this.root, ...key.split('/'));
     fs.mkdirSync(path.dirname(absolute), { recursive: true });

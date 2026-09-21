@@ -276,7 +276,6 @@ router.put(
   requireOwnerOrAdmin(async (req) => ownerOfAthleteId(req.params.id)),
   validateBody(updateSchema),
   asyncHandler(async (req, res) => {
-    const row = await loadAthleteRow(req.params.id);
     const input = req.body;
 
     const { rows } = await pool.query(

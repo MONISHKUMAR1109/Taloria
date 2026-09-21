@@ -9,7 +9,6 @@ import { validateBody } from '../middleware/validate.js';
 import { ok, created } from '../utils/envelope.js';
 import { badRequest, notFound, forbidden, AppError, ERROR_CODES } from '../utils/errors.js';
 import { audit } from '../utils/audit.js';
-import { notifyUser } from '../services/notifications.js';
 import { loadStatTemplate, assertStatsMatchTemplate } from '../services/statistics.js';
 
 const router = Router();
@@ -187,6 +186,70 @@ router.post(
 
     await audit({ entityType: 'tournament', entityId: rows[0].id, actorId: req.user.id, toState: 'draft' });
     res.status(201).json(created(rows[0]));
+  }),
+);
+
+// ---------------------------------------------------------------------------
+// GET /api/tournaments/categories — public list of tournament categories.
+// ---------------------------------------------------------------------------
+router.get(
+  '/categories',
+  asyncHandler(async (_req, res) => {
+    const { rows } = await pool.query(
+      'SELECT id, name FROM tournament_categories ORDER BY name',
+    );
+    res.json(ok(rows));
+  }),
+);
+
+// ---------------------------------------------------------------------------
+// GET /api/tournaments/mine — organizer-own list (all statuses incl. draft).
+// ---------------------------------------------------------------------------
+router.get(
+  '/mine',
+  authenticate,
+  requireRole('organizer', 'admin'),
+  asyncHandler(async (req, res) => {
+    const { page, pageSize, sort, order, offset } = parsePagination(req, SORTABLE);
+    const q = req.query;
+
+    const values = [];
+    const conditions = [];
+    let i = 1;
+    const add = (sql, ...vs) => {
+      values.push(...vs);
+      conditions.push(sql.replace(/\?/g, () => `$${i++}`));
+    };
+
+    if (req.user.role === 'organizer') {
+      const { rows: orgRows } = await pool.query(
+        'SELECT id FROM organizer_profiles WHERE user_id = $1 AND archived_at IS NULL',
+        [req.user.id],
+      );
+      if (orgRows.length === 0) throw forbidden('Organizer profile required.');
+      add('t.organizer_id = ?::uuid', orgRows[0].id);
+    }
+    if (q.status) add('t.status = ?', q.status);
+    if (q.q) add('t.title ILIKE ?', `%${q.q}%`);
+
+    const fromClause = `FROM tournaments t LEFT JOIN tournament_categories c ON c.id = t.category_id`;
+    const whereSql = conditions.length ? ` WHERE ${conditions.join(' AND ')}` : '';
+    const orderSql = `${sort} ${order}`;
+
+    const { rows: countRows } = await pool.query(`SELECT count(*)::int AS total ${fromClause}${whereSql}`, values);
+    const { rows } = await pool.query(
+      `SELECT t.id, t.title, t.description, t.category_id, c.name AS category_name,
+              t.location_country, t.location_city, t.registration_deadline, t.start_date, t.end_date,
+              t.max_participants, t.status, t.published_at, t.created_at, t.updated_at,
+              (SELECT count(*)::int FROM tournament_participants tp WHERE tp.tournament_id = t.id) AS participant_count,
+              (SELECT count(*)::int FROM sponsorship_requests sr WHERE sr.tournament_id = t.id AND sr.status = 'active') AS sponsor_count
+       ${fromClause}${whereSql}
+       ORDER BY ${orderSql} NULLS LAST, t.id
+       LIMIT $${i} OFFSET $${i + 1}`,
+      [...values, pageSize, offset],
+    );
+
+    res.json(ok(rows, { page, pageSize, total: countRows[0].total, totalPages: Math.max(1, Math.ceil(countRows[0].total / pageSize)) }));
   }),
 );
 
