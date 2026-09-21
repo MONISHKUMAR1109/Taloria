@@ -19,3 +19,5 @@ services:
         generateValue: true
       - key: DATABASE_URL
         value: postgres://CHANGE_ME:CHANGE_ME@CHANGE_ME.neon.tech/taloria?sslmode=require
+      - key: FRONTEND_BASE_URL
+        value: https://taloria-jn4g.onrender.com

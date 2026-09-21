@@ -1,15 +1,21 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import pool from '../config/db.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { parsePagination } from '../utils/pagination.js';
 import { authenticate } from '../middleware/authenticate.js';
 import { requireRole } from '../middleware/authorize.js';
+import { validateBody } from '../middleware/validate.js';
 import { ok } from '../utils/envelope.js';
 import { notFound, forbidden, AppError, ERROR_CODES } from '../utils/errors.js';
 import { audit } from '../utils/audit.js';
 import { notifyUser } from '../services/notifications.js';
 
 const router = Router();
+
+const decisionSchema = z.object({
+  status: z.enum(['approved', 'rejected', 'waitlisted']),
+});
 
 const SORTABLE = ['applied_at', 'decided_at', 'created_at', 'updated_at', 'status'];
 
@@ -89,16 +95,9 @@ router.put(
   '/:id',
   authenticate,
   requireRole('organizer', 'admin'),
+  validateBody(decisionSchema),
   asyncHandler(async (req, res) => {
-    if (!req.body.status) {
-      const err = new AppError(ERROR_CODES.VALIDATION, '"status" is required.', 400);
-      return res.status(400).json({ success: false, error: { code: err.code, message: err.message, details: null } });
-    }
     const target = req.body.status;
-    if (!['approved', 'rejected', 'waitlisted'].includes(target)) {
-      const err = new AppError(ERROR_CODES.VALIDATION, '"status" must be approved, rejected, or waitlisted.', 400);
-      return res.status(400).json({ success: false, error: { code: err.code, message: err.message, details: null } });
-    }
 
     const { rows } = await pool.query(
       `SELECT ta.*, t.title AS tournament_title, t.organizer_id, t.max_participants

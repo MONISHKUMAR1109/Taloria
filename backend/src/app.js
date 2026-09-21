@@ -21,6 +21,7 @@ import notificationRoutes from './routes/notifications.routes.js';
 import verificationRoutes from './routes/verification.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import publicRoutes from './routes/public.routes.js';
+import scoutingRoutes from './routes/scouting.routes.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -56,6 +57,7 @@ api.use('/notifications', notificationRoutes);
 api.use('/verification-requests', verificationRoutes);
 api.use('/admin', adminRoutes);
 api.use('/public', publicRoutes);
+api.use('/scouting', scoutingRoutes);
 app.use('/api', api);
 
 app.get('/health', (_req, res) => res.json({ success: true, status: 'ok', uptime: process.uptime() }));

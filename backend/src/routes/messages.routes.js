@@ -118,7 +118,7 @@ router.post(
         `INSERT INTO notifications (user_id, type, title, body, is_seed)
          VALUES ($1, 'scout_contact', 'A scout contacted you',
                  'A scout has started a conversation with you.', false)`,
-        [athleteUserIdOf(req.body.athlete_id)],
+        [await athleteUserIdOf(req.body.athlete_id)],
       );
 
       await client.query('COMMIT');

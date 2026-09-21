@@ -75,6 +75,11 @@ const verifyEmailSchema = z.object({
   token: z.string().min(1),
 });
 
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1).max(128),
+  newPassword: z.string().min(8).max(128),
+});
+
 const resendVerificationSchema = z.object({
   email: z.string().email().max(254),
 });
@@ -442,6 +447,52 @@ router.post(
 
       await client.query('COMMIT');
       res.json(ok({ message: 'Password updated. You can now log in.' }));
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+  }),
+);
+
+// ---------------------------------------------------------------------------
+// POST /api/auth/change-password — authenticated password change.
+// Keeps the current session alive; signs out every other session.
+// ---------------------------------------------------------------------------
+router.post(
+  '/change-password',
+  authenticate,
+  validateBody(changePasswordSchema),
+  asyncHandler(async (req, res) => {
+    const { rows } = await pool.query('SELECT id, password_hash FROM users WHERE id = $1', [req.user.id]);
+    const user = rows[0];
+
+    const matches = await verifyPassword(req.body.currentPassword, user.password_hash);
+    if (!matches) {
+      throw new AppError(ERROR_CODES.INVALID_CREDENTIALS, 'Current password is incorrect.', 401);
+    }
+
+    const passwordHash = await hashPassword(req.body.newPassword);
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query('UPDATE users SET password_hash = $1, updated_at = now() WHERE id = $2', [passwordHash, req.user.id]);
+      const currentHash = req.cookies?.rt ? hashRefreshToken(req.cookies.rt) : null;
+      if (currentHash) {
+        await client.query(
+          `UPDATE refresh_tokens SET revoked_at = now()
+            WHERE user_id = $1 AND revoked_at IS NULL AND token_hash <> $2`,
+          [req.user.id, currentHash],
+        );
+      } else {
+        await client.query(
+          `UPDATE refresh_tokens SET revoked_at = now() WHERE user_id = $1 AND revoked_at IS NULL`,
+          [req.user.id],
+        );
+      }
+      await client.query('COMMIT');
+      res.json(ok({ message: 'Password updated. Your other sessions were signed out.' }));
     } catch (err) {
       await client.query('ROLLBACK');
       throw err;

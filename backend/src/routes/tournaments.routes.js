@@ -207,6 +207,21 @@ router.get(
     if (rows.length === 0) throw notFound('Tournament not found.');
     const tournament = rows[0];
 
+    // Drafts/cancelled tournaments are private — only the organizer and admins may view.
+    const PUBLIC_STATUSES = ['published', 'registration_open', 'registration_closed', 'ongoing', 'completed'];
+    if (!PUBLIC_STATUSES.includes(tournament.status)) {
+      await authenticate(req, res, (err) => { if (err) throw err; });
+      if (req.user.role !== 'admin') {
+        const { rows: orgRows } = await pool.query(
+          'SELECT id FROM organizer_profiles WHERE user_id = $1 AND archived_at IS NULL',
+          [req.user.id],
+        );
+        if (orgRows.length === 0 || orgRows[0].id !== tournament.organizer_id) {
+          throw forbidden('Only the tournament organizer or an admin can view this tournament.');
+        }
+      }
+    }
+
     const [packages, participants, activeSponsors] = await Promise.all([
       pool.query(
         `SELECT id, name, price, currency, benefits_description, max_slots,
