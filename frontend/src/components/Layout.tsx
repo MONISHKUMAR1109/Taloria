@@ -5,7 +5,7 @@ import { useAuth } from '../auth/auth-context'
 import { notificationsApi } from '../lib/endpoints'
 import { formatDateTime } from '../lib/format'
 import type { AppNotification, Role } from '../lib/types'
-import { Button, RoleBadge, Spinner, ThemeToggle } from './ui'
+import { Button, RoleBadge, Spinner } from './ui'
 import { Avatar } from './ui'
 import {
   IconBell,
@@ -87,7 +87,6 @@ function PublicNav() {
               </Link>
             </>
           )}
-          <ThemeToggle />
         </nav>
       </div>
     </header>
@@ -206,6 +205,19 @@ export function DashboardShell() {
   const navigate = useNavigate()
   const location = useLocation()
   const [busy, setBusy] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+
+  useEffect(() => {
+    setDrawerOpen(false)
+  }, [location.pathname])
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setDrawerOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   if (status === 'loading') {
     return (
@@ -228,13 +240,19 @@ export function DashboardShell() {
     .flatMap((g) => g.items)
     .find((item) => (item.end ? location.pathname === item.to : location.pathname.startsWith(item.to)))
 
+  const tabs = groups
+    .flatMap((g) => g.items)
+    .filter((item, i, arr) => arr.findIndex((x) => x.to === item.to) === i)
+
   return (
     <div className="shell">
-      <aside className="shell-side">
-        <Link to="/" className="brand">
-          <span className="brand-mark" aria-hidden="true" />
-          TALORIA
-        </Link>
+      <aside className={`shell-side${drawerOpen ? ' shell-side-open' : ''}`}>
+        <div className="shell-brand">
+          <Link to="/" className="brand">
+            <span className="brand-mark" aria-hidden="true" />
+            TALORIA
+          </Link>
+        </div>
 
         <nav className="shell-nav" aria-label="Dashboard">
           {groups.map((group) => (
@@ -284,14 +302,22 @@ export function DashboardShell() {
         </div>
       </aside>
 
+      {drawerOpen ? (
+        <button type="button" className="shell-scrim" aria-label="Close menu" onClick={() => setDrawerOpen(false)} />
+      ) : null}
+
       <div className="shell-main">
         <header className="shell-top">
-          <div>
-            <p className="eyebrow" style={{ margin: 0 }}>{user.role}</p>
-            <h1 style={{ margin: 0 }}>{current?.label ?? 'Dashboard'}</h1>
+          <div className="flex items-center gap-3">
+            <button type="button" className="shell-menu-btn" aria-label="Open menu" onClick={() => setDrawerOpen(true)}>
+              ☰
+            </button>
+            <div>
+              <p className="eyebrow" style={{ margin: 0 }}>{user.role}</p>
+              <h1 style={{ margin: 0 }}>{current?.label ?? 'Dashboard'}</h1>
+            </div>
           </div>
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             <NotificationBell />
           </div>
         </header>
@@ -299,6 +325,22 @@ export function DashboardShell() {
           <Outlet />
         </main>
       </div>
+
+      <nav className="shell-tabbar" aria-label="Dashboard">
+        <div className="shell-tabbar-inner" style={{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }}>
+          {tabs.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) => `shell-tab-item${isActive ? ' shell-tab-item-active' : ''}`}
+            >
+              {item.icon}
+              <span>{item.label}</span>
+            </NavLink>
+          ))}
+        </div>
+      </nav>
     </div>
   )
 }

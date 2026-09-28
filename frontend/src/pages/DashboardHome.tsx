@@ -66,14 +66,16 @@ export function DashboardHome() {
       <p className="muted">{plan.body}</p>
 
       <Card className="mt-4">
-        <h3>What&apos;s next in this dashboard</h3>
-        <ul className="plain">
-          {plan.next.map((item) => (
-            <li key={item} className="mb-2 small">
-              • {item}
-            </li>
-          ))}
-        </ul>
+        <div className="card-body">
+          <h3>What&apos;s next in this dashboard</h3>
+          <ul className="plain">
+            {plan.next.map((item) => (
+              <li key={item} className="mb-2 small">
+                • {item}
+              </li>
+            ))}
+          </ul>
+        </div>
       </Card>
     </div>
   )

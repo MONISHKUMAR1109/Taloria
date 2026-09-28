@@ -55,7 +55,8 @@ export function PublicTalent() {
         <div className="grid-3">
           {athletes.map((a) => (
             <Card key={a.id} className="card-hover">
-              <div className="flex items-center gap-3 mb-3">
+              <div className="card-body">
+                <div className="flex items-center gap-3 mb-3">
                 <Avatar name={displayName(a)} src={mediaUrl(a.profile_picture_key)} size="xl" />
                 <div style={{ minWidth: 0 }}>
                   <p className="truncate" style={{ fontWeight: 700, margin: 0 }}>{displayName(a)}</p>
@@ -92,6 +93,7 @@ export function PublicTalent() {
                     <Button variant="secondary" size="sm">Log in to connect</Button>
                   </Link>
                 )}
+              </div>
               </div>
             </Card>
           ))}

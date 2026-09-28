@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react'
 import type { Role } from '../lib/types'
 import { ROLE_LABELS } from '../lib/types'
@@ -80,37 +79,6 @@ export function Spinner() {
     <div className="centered">
       <div className="spinner" role="status" aria-label="Loading" />
     </div>
-  )
-}
-
-export function ThemeToggle() {
-  const [dark, setDark] = useState(() => {
-    try {
-      return document.documentElement.dataset.theme === 'dark'
-    } catch {
-      return false
-    }
-  })
-
-  return (
-    <button
-      type="button"
-      className="theme-toggle"
-      aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'}
-      title={dark ? 'Light mode' : 'Dark mode'}
-      onClick={() => {
-        const next = !dark
-        setDark(next)
-        document.documentElement.dataset.theme = next ? 'dark' : 'light'
-        try {
-          localStorage.setItem('taloria-theme', next ? 'dark' : 'light')
-        } catch {
-          /* ignore */
-        }
-      }}
-    >
-      {dark ? '☀' : '☾'}
-    </button>
   )
 }
 

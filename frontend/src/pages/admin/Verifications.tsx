@@ -108,7 +108,8 @@ export function AdminVerifications() {
           <div className="flex flex-col gap-3">
             {pending.map((r) => (
               <Card key={r.id}>
-                <div className="row" style={{ border: 'none', boxShadow: 'none', padding: 0 }}>
+                <div className="card-body">
+                  <div className="row" style={{ border: 'none', boxShadow: 'none', padding: 0 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div className="flex items-center gap-3 flex-wrap">
                       <p style={{ fontWeight: 700, margin: 0 }}>{r.athlete_name}</p>
@@ -139,6 +140,7 @@ export function AdminVerifications() {
                     >
                       Reject
                     </Button>
+                  </div>
                   </div>
                 </div>
               </Card>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Alert, Button, Card, EmptyState, Input, Pager, Select, Spinner, Tag } from '../../components/ui'
 import { IconCalendar, IconUsers } from '../../components/Icons'
 import { tournamentsApi } from '../../lib/endpoints'
@@ -27,8 +27,9 @@ export function PublicTournaments() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [scope, setScope] = useState<'open' | 'all'>('open')
-  const [q, setQ] = useState('')
-  const [qApplied, setQApplied] = useState('')
+  const [searchParams] = useSearchParams()
+  const [q, setQ] = useState(searchParams.get('q') ?? '')
+  const [qApplied, setQApplied] = useState(searchParams.get('q') ?? '')
   const [category, setCategory] = useState('')
   const [country, setCountry] = useState('')
   const [status, setStatus] = useState('')
@@ -189,7 +190,8 @@ export function PublicTournaments() {
             const location = [t.location_city, t.location_country].filter(Boolean).join(', ') || 'Location TBA'
             return (
               <Card key={t.id} className="card-hover">
-                <div className="flex items-center gap-2">
+                <div className="card-body">
+                  <div className="flex items-center gap-2">
                   {t.category_name ? <Tag tone="info">{t.category_name}</Tag> : null}
                   <Tag tone={meta.tone}>{meta.label}</Tag>
                 </div>
@@ -210,6 +212,7 @@ export function PublicTournaments() {
                 <Link className="inline-link" to={`/tournaments/${t.id}`}>
                   View tournament
                 </Link>
+                </div>
               </Card>
             )
           })}
